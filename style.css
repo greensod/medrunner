@@ -1,0 +1,851 @@
+/* ============================================================
+   MED RUNNER — style.css
+   Clean medical aesthetic: white coat whites, stethoscope teal,
+   exam-red danger, anatomy-bone yellows.
+   All game elements use absolute positioning within #game-scene.
+   ============================================================ */
+
+/* ── RESET & GLOBAL ────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+:root {
+  /* Palette — starts LIGHT (daytime), JS switches to dark after ~30s */
+  --col-bg:        #e8f4f8;   /* soft sky blue background */
+  --col-ground:    #c8e6c9;   /* grass green */
+  --col-accent:    #00897b;   /* teal */
+  --col-danger:    #e53935;   /* red */
+  --col-gold:      #f9a825;   /* gold */
+  --col-white:     #1a2a3a;   /* dark text in light mode */
+  --col-muted:     #546e7a;
+  --col-sky-top:   #b3d9f0;   /* light sky top */
+  --col-sky-bot:   #e8f4f8;   /* light sky bottom */
+
+  /* Sizes */
+  --scene-h:       calc(100dvh - 140px);
+  --ground-h:      70px;
+  --player-w:      90px;
+  --player-h:      110px;
+  --player-duck-h: 60px;
+  --ground-y:      calc(var(--scene-h) - var(--ground-h));
+}
+
+/* ── DARK MODE (added by JS after ~30 seconds) ──────────────── */
+body.dark-mode {
+  --col-bg:        #0d1b2a;
+  --col-ground:    #1e3a5f;
+  --col-accent:    #00c9a7;
+  --col-danger:    #ff4d6d;
+  --col-gold:      #ffd166;
+  --col-white:     #f0f4f8;
+  --col-muted:     #7b8fa6;
+  --col-sky-top:   #0a1628;
+  --col-sky-bot:   #1a3a6e;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--col-bg);
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--col-white);
+  transition: background 2s ease, color 2s ease;
+}
+
+/* ── OVERLAY SCREENS (Start / Game Over) ───────────────────── */
+.overlay-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(180, 220, 240, 0.88); /* light sky blue tint */
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  transition: opacity 0.3s;
+}
+
+.overlay-screen.hidden {
+  display: none;
+}
+
+/* ── BIRTHDAY INTRO SCREEN ──────────────────────────────────── */
+#birthday-screen {
+  z-index: 200; /* always sits above the start screen */
+  background: linear-gradient(160deg, #ffe9f3 0%, #fff3d6 50%, #e8f4ff 100%);
+  overflow: hidden;
+}
+
+#birthday-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bday-floater {
+  position: absolute;
+  bottom: -10%;
+  opacity: 0;
+  animation-name: bday-float-up;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes bday-float-up {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg);   opacity: 0; }
+  8%   { opacity: 0.9; }
+  50%  { transform: translateY(-55vh) translateX(12px) rotate(8deg); }
+  90%  { opacity: 0.85; }
+  100% { transform: translateY(-115vh) translateX(-10px) rotate(-6deg); opacity: 0; }
+}
+
+.birthday-content {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid #f9a825;
+  box-shadow: 0 8px 40px rgba(249, 168, 37, 0.25);
+  min-height: 120px;
+  justify-content: center;
+}
+
+.birthday-text {
+  font-size: clamp(1.3rem, 4.5vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #d6336c;
+  text-shadow: 0 0 14px rgba(249, 168, 37, 0.25);
+  min-height: 2.4em;
+  display: block;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.caret {
+  display: inline-block;
+  margin-left: 2px;
+  animation: caret-blink 0.9s step-end infinite;
+  color: #00897b;
+}
+
+@keyframes caret-blink {
+  0%, 50%  { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+#birthday-continue-btn {
+  background: #d6336c;
+  box-shadow: 0 4px 16px rgba(214, 51, 108, 0.35);
+}
+#birthday-continue-btn:hover {
+  box-shadow: 0 6px 22px rgba(214, 51, 108, 0.5);
+}
+
+.overlay-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  border: 2px solid #00897b;           /* teal border */
+  border-radius: 20px;
+  background: #ffffff;                  /* clean white card */
+  color: #1a2a3a;
+  min-width: 300px;
+  max-width: 90vw;
+  box-shadow: 0 8px 40px rgba(0, 137, 123, 0.18);
+}
+
+.game-title {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #00897b;                       /* teal on white */
+  text-shadow: none;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #546e7a;
+  letter-spacing: 0.04em;
+}
+
+.controls-hint {
+  display: flex;
+  gap: 20px;
+  font-size: 0.8rem;
+  color: #546e7a;
+  border: 1px solid #b3d9f0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  background: #f0f8ff;
+}
+
+.gameover-title {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  color: #e53935;
+  letter-spacing: 0.08em;
+  text-shadow: none;
+}
+
+.gameover-subtitle {
+  font-size: 0.9rem;
+  color: #546e7a;
+}
+
+.score-display {
+  display: flex;
+  gap: 32px;
+  padding: 12px 24px;
+  background: #f0f8ff;
+  border-radius: 10px;
+  border: 1px solid #b3d9f0;
+}
+
+.score-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.score-label {
+  font-size: 0.7rem;
+  color: #546e7a;
+  letter-spacing: 0.1em;
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a2a3a;
+}
+
+.score-value.hi {
+  color: #f9a825;
+}
+
+.big-btn {
+  background: #00897b;                  /* teal button */
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 14px 40px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(0, 137, 123, 0.3);
+}
+
+.big-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,137,123,0.45); }
+.big-btn:active { transform: translateY(0);     box-shadow: none; }
+
+/* ── GAME WRAPPER & HUD ─────────────────────────────────────── */
+#game-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;  /* top-align so scene can grow */
+  height: 100dvh;               /* dynamic viewport height — no address-bar gap on mobile */
+  padding: 8px;
+  gap: 8px;
+}
+
+#hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  padding: 6px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(123,143,166,0.15);
+  border-radius: 10px;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--col-muted);
+}
+
+#hud-left  { text-align: left; }
+#hud-center{ text-align: center; }
+#hud-right { text-align: right; font-size: 1.2rem; letter-spacing: 3px; }
+
+#score-display, #highscore-display {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--col-white);
+}
+
+#highscore-display { color: var(--col-gold); }
+
+/* ── GAME SCENE ─────────────────────────────────────────────── */
+#game-scene {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  height: var(--scene-h);
+  flex: 1;                      /* grow to fill leftover space */
+  min-height: 220px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 2px solid rgba(0, 201, 167, 0.2);
+  box-shadow: 0 0 60px rgba(0,201,167,0.08), inset 0 0 40px rgba(0,0,0,0.04);
+}
+
+/* Screen-shake animation */
+@keyframes screen-shake {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  15%  { transform: translate(-5px, 3px) rotate(-0.5deg); }
+  30%  { transform: translate(5px, -3px) rotate(0.5deg); }
+  45%  { transform: translate(-4px, 2px) rotate(-0.3deg); }
+  60%  { transform: translate(4px, -2px) rotate(0.3deg); }
+  75%  { transform: translate(-2px, 1px) rotate(-0.1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+#game-scene.shake {
+  animation: screen-shake 0.45s ease-out;
+}
+
+/* ── BACKGROUND LAYERS (Parallax) ───────────────────────────── */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Sky gradient */
+#bg-sky {
+  background: linear-gradient(180deg, var(--col-sky-top) 0%, var(--col-sky-bot) 100%);
+  transition: background 2s ease;
+}
+
+/* Scrolling clouds */
+#bg-clouds {
+  /* animated via JS translateX on individual .cloud divs */
+}
+
+.cloud {
+  position: absolute;
+  width: 80px;
+  height: 24px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50px;
+  box-shadow: 0 0 20px rgba(255,255,255,0.04);
+}
+.cloud::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 20%;
+  width: 40%;
+  height: 28px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+
+/* Hills silhouette */
+#bg-hills {
+  position: absolute;
+  bottom: var(--ground-h);
+  left: 0;
+  width: 200%;
+  height: 80px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 140px,
+    rgba(14,40,80,0.6) 141px
+  );
+  /* Uses a radial-gradient trick for organic bumps */
+  background: 
+    radial-gradient(ellipse 120px 60px at 10% 100%, rgba(14,40,80,0.7) 60%, transparent 61%),
+    radial-gradient(ellipse 100px 55px at 28% 100%, rgba(14,40,80,0.65) 60%, transparent 61%),
+    radial-gradient(ellipse 140px 70px at 46% 100%, rgba(14,40,80,0.7) 60%, transparent 61%),
+    radial-gradient(ellipse 90px  50px at 64% 100%, rgba(14,40,80,0.65) 60%, transparent 61%),
+    radial-gradient(ellipse 130px 65px at 80% 100%, rgba(14,40,80,0.7) 60%, transparent 61%),
+    radial-gradient(ellipse 110px 55px at 96% 100%, rgba(14,40,80,0.65) 60%, transparent 61%);
+  animation: scroll-hills 8s linear infinite;
+}
+
+@keyframes scroll-hills {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── GROUND ─────────────────────────────────────────────────── */
+#ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--ground-h);
+  background: linear-gradient(180deg, #7cb87e 0%, #5a9e5c 100%); /* green grass (light) */
+  transition: background 2s ease;
+}
+
+body.dark-mode #ground {
+  background: linear-gradient(180deg, #1e3a6a 0%, #0d1b2a 100%);
+}
+
+/* The bright running line at the top of the ground */
+#ground-line {
+  position: absolute;
+  bottom: var(--ground-h);
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--col-accent), transparent);
+  opacity: 0.6;
+}
+
+/* Animated dashes on the ground line */
+#ground-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--col-accent) 0px,
+    var(--col-accent) 20px,
+    transparent 20px,
+    transparent 60px
+  );
+  opacity: 0.4;
+  animation: scroll-ground 0.6s linear infinite;
+}
+
+@keyframes scroll-ground {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-80px); }
+}
+
+/* ── PLAYER ─────────────────────────────────────────────────── */
+#player {
+  position: absolute;
+  left: 48px;          /* closer to left edge, more visible */
+  width: var(--player-w);
+  height: var(--player-h);
+  transition: height 0.08s;
+  z-index: 10;
+}
+
+#player.ducking {
+  height: var(--player-duck-h);
+}
+
+/* The visual sprite */
+#player-sprite {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  position: relative;
+  /* No default background-image — JS sets it when image loads */
+}
+
+/* Emoji fallback — only shows when no image is loaded (.has-image not set) */
+#player-sprite::before {
+  content: '🧑‍⚕️';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 80px;
+  line-height: 1;
+}
+
+/* When a real PNG is loaded, hide the emoji completely */
+#player-sprite.has-image::before {
+  content: none;
+  display: none;
+}
+
+/* Jump animation */
+@keyframes jump-squish {
+  0%   { transform: scaleY(1) scaleX(1); }
+  15%  { transform: scaleY(0.8) scaleX(1.2); }
+  30%  { transform: scaleY(1.1) scaleX(0.95); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
+#player.jumping #player-sprite {
+  animation: jump-squish 0.2s ease-out;
+}
+
+/* Running animation (bob) */
+@keyframes run-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+#player:not(.jumping):not(.ducking) #player-sprite {
+  animation: run-bob 0.22s ease-in-out infinite;
+}
+
+/* Hit flash — subtle red tint only, no blinding white lightning */
+@keyframes hit-flash {
+  0%, 100% { filter: brightness(1) sepia(0); }
+  30%       { filter: brightness(0.7) sepia(1) hue-rotate(-20deg) saturate(3); }
+  60%       { filter: brightness(1) sepia(0); }
+}
+
+#player.hit {
+  animation: hit-flash 0.5s ease-in-out;
+}
+
+/* ── OBSTACLES & COLLECTIBLES ───────────────────────────────── */
+.game-element {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: 28px;
+  line-height: 1;
+  z-index: 8;
+}
+
+/* Ground obstacles */
+.obstacle-ground {
+  /* Bottom is set to ground level by JS */
+}
+
+/* Sky obstacles */
+.obstacle-sky {
+  /* Top is set to sky zone by JS */
+}
+
+/* Collectibles get a gentle float */
+@keyframes float-item {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.collectible {
+  animation: float-item 1.2s ease-in-out infinite;
+}
+
+/* Glow ring around collectibles */
+.collectible::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 209, 102, 0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Sky collectibles also pulse */
+@keyframes sky-pulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-5px) scale(1.05); }
+}
+
+.collectible-sky {
+  animation: sky-pulse 1.5s ease-in-out infinite;
+}
+
+/* Obstacle entrance — slide in from right */
+@keyframes obstacle-enter {
+  from { opacity: 0; transform: translateX(20px) scale(0.8); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.game-element {
+  animation: obstacle-enter 0.2s ease-out;
+}
+/* Don't override the float animations — only play entrance once */
+.collectible { animation: obstacle-enter 0.2s ease-out, float-item 1.2s ease-in-out 0.2s infinite; }
+.collectible-sky { animation: obstacle-enter 0.2s ease-out, sky-pulse 1.5s ease-in-out 0.2s infinite; }
+
+/* ── FLOATING POINT POPUPS ──────────────────────────────────── */
+@keyframes popup-float {
+  0%   { opacity: 1;   transform: translateY(0)    scale(1); }
+  70%  { opacity: 1;   transform: translateY(-40px) scale(1.1); }
+  100% { opacity: 0;   transform: translateY(-60px) scale(0.9); }
+}
+
+.popup {
+  position: absolute;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  z-index: 20;
+  animation: popup-float 0.9s ease-out forwards;
+  white-space: nowrap;
+}
+
+.popup.positive { color: var(--col-gold); text-shadow: 0 0 8px rgba(255,209,102,0.8); }
+.popup.negative { color: var(--col-danger); text-shadow: 0 0 8px rgba(255,77,109,0.8); }
+.popup.boost    { color: var(--col-accent); font-size: 0.85rem; }
+
+/* ── MOBILE CONTROLS ────────────────────────────────────────── */
+#mobile-controls {
+  display: none;
+  gap: 16px;
+  width: 100%;
+  max-width: 700px;
+}
+
+@media (max-width: 600px), (pointer: coarse) {
+  #mobile-controls {
+    display: flex;
+  }
+}
+
+.mobile-btn {
+  flex: 1;
+  padding: 14px 10px;
+  background: rgba(0,201,167,0.12);
+  border: 2px solid rgba(0,201,167,0.4);
+  border-radius: 12px;
+  color: var(--col-accent);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-btn:active {
+  background: rgba(0,201,167,0.25);
+  transform: scale(0.97);
+}
+
+/* ── BOOST INDICATOR ────────────────────────────────────────── */
+#boost-indicator {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,201,167,0.9);
+  color: #0a1628;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  z-index: 50;
+  animation: boost-pulse 0.5s ease-in-out infinite alternate;
+}
+
+#boost-indicator.hidden { display: none; }
+
+@keyframes boost-pulse {
+  from { box-shadow: 0 0 8px rgba(0,201,167,0.5); }
+  to   { box-shadow: 0 0 20px rgba(0,201,167,0.9); }
+}
+
+/* ── SPEED LEVEL INDICATOR ──────────────────────────────────── */
+#speed-bar-wrap {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 15;
+  font-size: 0.6rem;
+  color: var(--col-muted);
+  letter-spacing: 0.08em;
+}
+
+#speed-bar {
+  width: 60px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#speed-fill {
+  height: 100%;
+  width: 10%;
+  background: var(--col-accent);
+  border-radius: 4px;
+  transition: width 0.5s, background 0.5s;
+}
+
+/* ── UTILITY ─────────────────────────────────────────────────── */
+.hidden { display: none !important; }
+/* ══════════════════════════════════════════════════════════════
+   NEW FEATURES: Combo HUD, Vignette, Particles, Mission Panel
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── COMBO HUD ──────────────────────────────────────────────── */
+/* Lives inside #hud-center, above the game scene */
+#combo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+  margin-top: 2px;
+}
+
+#combo-wrap.hidden { display: none; }
+
+#combo-label {
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #ffd166;
+}
+
+#combo-timer-track {
+  width: 80px;
+  height: 3px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#combo-timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #ffd166;
+  border-radius: 4px;
+  transition: width 0.1s linear;
+}
+
+/* Combo popup style */
+.popup.combo {
+  color: #ffd166;
+  font-size: 1.3rem;
+  font-weight: 900;
+  text-shadow: 0 0 14px rgba(255, 209, 102, 0.7);
+  letter-spacing: 0.06em;
+}
+
+/* ── VIGNETTE (danger warning) ──────────────────────────────── */
+#vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  border-radius: 14px;
+  transition: box-shadow 0.4s ease;
+}
+
+#vignette.warning {
+  box-shadow: inset 0 0 50px 10px rgba(249, 168, 37, 0.25);
+}
+
+#vignette.danger {
+  box-shadow: inset 0 0 60px 16px rgba(229, 57, 53, 0.4);
+  animation: danger-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes danger-pulse {
+  from { box-shadow: inset 0 0 50px 12px rgba(229, 57, 53, 0.3); }
+  to   { box-shadow: inset 0 0 80px 24px rgba(229, 57, 53, 0.55); }
+}
+
+/* ── PARTICLE BURST ─────────────────────────────────────────── */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 22;
+  animation: particle-fly 0.48s ease-out forwards;
+}
+
+@keyframes particle-fly {
+  0%   { transform: translate(0, 0) scale(1);   opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+/* ── DAILY MISSION PANEL ────────────────────────────────────── */
+/* Sits BELOW #game-wrapper, not inside the scene */
+#mission-panel {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 8px;
+  pointer-events: none;
+}
+
+.mission-item {
+  flex: 1 1 180px;
+  background: rgba(10, 22, 40, 0.55);
+  border: 1px solid rgba(0, 201, 167, 0.2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mission-item.done {
+  border-color: rgba(0, 201, 167, 0.5);
+  opacity: 0.6;
+}
+
+.mission-bar-wrap {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mission-bar {
+  height: 100%;
+  background: var(--col-accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.mission-item.done .mission-bar {
+  background: #00c9a7;
+  width: 100% !important;
+}
+
+.mission-desc {
+  font-size: 0.65rem;
+  color: var(--col-muted);
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.mission-prog {
+  font-size: 0.62rem;
+  color: var(--col-accent);
+  font-weight: 700;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  #mission-panel { flex-direction: column; padding: 4px 8px; }
+  .mission-item  { flex: unset; }
+}

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Med Student Runner 🩺</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========================================================
+       BIRTHDAY INTRO SCREEN — typed greeting + cute floating bg
+  ======================================================== -->
+  <div id="birthday-screen" class="overlay-screen">
+    <div id="birthday-bg" aria-hidden="true"></div>
+    <div class="overlay-content birthday-content">
+      <div id="birthday-text" class="birthday-text"><span id="birthday-typed"></span><span class="caret">|</span></div>
+      <button id="birthday-continue-btn" class="big-btn hidden">🎉 Continue</button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       START SCREEN
+  ======================================================== -->
+  <div id="start-screen" class="overlay-screen hidden">
+    <div class="overlay-content">
+      <h1 class="game-title">🩺 Med Runner</h1>
+      <p class="subtitle">Survive exams. Collect bones. Graduate.</p>
+      <div class="controls-hint">
+        <span>⬆ / Space = Jump</span>
+        <span>⬇ = Duck</span>
+      </div>
+      <button id="start-btn" class="big-btn">▶ START GAME</button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       GAME OVER SCREEN
+  ======================================================== -->
+  <div id="gameover-screen" class="overlay-screen hidden">
+    <div class="overlay-content">
+      <h2 class="gameover-title">💀 GAME OVER</h2>
+      <p class="gameover-subtitle">The professor wins this round.</p>
+      <div class="score-display">
+        <div class="score-row">
+          <span class="score-label">SCORE</span>
+          <span id="final-score" class="score-value">0</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">BEST</span>
+          <span id="final-highscore" class="score-value hi">0</span>
+        </div>
+      </div>
+      <button id="restart-btn" class="big-btn">↩ TRY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MAIN GAME WRAPPER
+  ======================================================== -->
+  <div id="game-wrapper">
+
+    <!-- HUD: Score, High Score, Lives -->
+    <div id="hud">
+      <div id="hud-left">
+        <span class="hud-label">SCORE</span>
+        <span id="score-display">0</span>
+      </div>
+      <div id="hud-center">
+        <span class="hud-label">BEST</span>
+        <span id="highscore-display">0</span>
+      </div>
+      <div id="hud-right">
+        <span id="lives-display">🩺🩺🩺</span>
+      </div>
+    </div>
+
+    <!-- GAME SCENE — all game elements live here -->
+    <div id="game-scene">
+
+      <!-- Parallax background layers -->
+      <div class="bg-layer" id="bg-sky"></div>
+      <div class="bg-layer" id="bg-clouds">
+        <div class="cloud" style="left:10%;top:20%"></div>
+        <div class="cloud" style="left:40%;top:10%"></div>
+        <div class="cloud" style="left:70%;top:25%"></div>
+        <div class="cloud" style="left:90%;top:15%"></div>
+      </div>
+      <div class="bg-layer" id="bg-hills"></div>
+
+      <!-- Ground -->
+      <div id="ground"></div>
+      <div id="ground-line"></div>
+
+      <!-- Player character -->
+      <div id="player">
+        <!-- Sprite is set via CSS background-image or inline style -->
+        <div id="player-sprite"></div>
+        <!-- Ducking hitbox helper (invisible) -->
+      </div>
+
+      <!-- Dynamic elements container (obstacles & collectibles spawned here) -->
+      <div id="elements-container"></div>
+
+      <!-- Floating point popups rendered here -->
+      <div id="popups-container"></div>
+
+    </div><!-- end #game-scene -->
+
+    <!-- MOBILE CONTROLS -->
+    <div id="mobile-controls">
+      <button id="btn-jump" class="mobile-btn">▲ JUMP</button>
+      <button id="btn-duck" class="mobile-btn">▼ DUCK</button>
+    </div>
+
+  </div><!-- end #game-wrapper -->
+
+  <!-- Speed boost indicator -->
+  <div id="boost-indicator" class="hidden">☕ COFFEE BOOST!</div>
+
+  <script>
+    // ── BIRTHDAY INTRO: typing animation + cute floating background ──
+    (function () {
+      const MESSAGE = 'Happy Birthday to my personal Genie 🎂';
+      const $typed   = document.getElementById('birthday-typed');
+      const $screen  = document.getElementById('birthday-screen');
+      const $startScreen = document.getElementById('start-screen');
+      const $continueBtn = document.getElementById('birthday-continue-btn');
+      const $bg = document.getElementById('birthday-bg');
+
+      // Cute floating background: balloons, hearts, sparkles drifting up
+      const FLOATERS = ['🎈', '✨', '💖', '🎉', '🌟', '🎈', '💫', '🎂'];
+      const floaterCount = 22;
+      for (let i = 0; i < floaterCount; i++) {
+        const el = document.createElement('span');
+        el.className = 'bday-floater';
+        el.textContent = FLOATERS[Math.floor(Math.random() * FLOATERS.length)];
+        const left = Math.random() * 100;
+        const delay = Math.random() * 8;
+        const duration = 7 + Math.random() * 6;
+        const size = 1.2 + Math.random() * 1.6;
+        el.style.left = left + 'vw';
+        el.style.animationDelay = delay + 's';
+        el.style.animationDuration = duration + 's';
+        el.style.fontSize = size + 'rem';
+        $bg.appendChild(el);
+      }
+
+      // Typing animation
+      let i = 0;
+      function typeNext() {
+        if (i <= MESSAGE.length) {
+          $typed.textContent = MESSAGE.slice(0, i);
+          i++;
+          setTimeout(typeNext, 55);
+        } else {
+          // finished typing — reveal continue button
+          $continueBtn.classList.remove('hidden');
+        }
+      }
+      setTimeout(typeNext, 400);
+
+      function goToStartScreen() {
+        $screen.classList.add('hidden');
+        $startScreen.classList.remove('hidden');
+      }
+
+      $continueBtn.addEventListener('click', goToStartScreen);
+    })();
+  </script>
+
+  <script src="game.js"></script>
+</body>
+</html>
