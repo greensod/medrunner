@@ -26,12 +26,12 @@
   --col-sky-top:   #b3d9f0;   /* light sky top */
   --col-sky-bot:   #e8f4f8;   /* light sky bottom */
 
-  /* Sizes */
+  /* Sizes — increased for visibility */
   --scene-h:       calc(100dvh - 140px);
-  --ground-h:      70px;
-  --player-w:      90px;
-  --player-h:      110px;
-  --player-duck-h: 60px;
+  --ground-h:      80px;
+  --player-w:      120px;
+  --player-h:      140px;
+  --player-duck-h: 72px;
   --ground-y:      calc(var(--scene-h) - var(--ground-h));
 }
 
@@ -302,6 +302,7 @@ html, body {
   max-width: 700px;
   height: var(--scene-h);
   flex: 1;                      /* grow to fill leftover space */
+  touch-action: none;           /* let our JS handle tap/swipe without page scroll */
   min-height: 220px;
   overflow: hidden;
   border-radius: 14px;
@@ -470,7 +471,7 @@ body.dark-mode #ground {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  font-size: 80px;
+  font-size: 100px;
   line-height: 1;
 }
 
@@ -521,9 +522,28 @@ body.dark-mode #ground {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  font-size: 28px;
+  font-size: 38px;   /* slightly smaller than 48px — still clearly readable */
   line-height: 1;
   z-index: 8;
+  gap: 2px;
+}
+
+.el-emoji {
+  display: block;
+  line-height: 1;
+}
+
+.el-label {
+  display: block;
+  font-size: 9px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--col-white);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  white-space: nowrap;
+  opacity: 0.85;
+  line-height: 1;
 }
 
 /* Ground obstacles */
@@ -692,6 +712,43 @@ body.dark-mode #ground {
 
 /* ── UTILITY ─────────────────────────────────────────────────── */
 .hidden { display: none !important; }
+
+/* ── SHIELD PLAYER GLOW ──────────────────────────────────────── */
+@keyframes shield-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px #00c9a7) brightness(1.05); }
+  50%       { filter: drop-shadow(0 0 22px #00c9a7) brightness(1.15); }
+}
+
+#player.shielded #player-sprite {
+  animation: shield-pulse 0.8s ease-in-out infinite;
+}
+
+/* ── DOUBLE JUMP FLASH ───────────────────────────────────────── */
+@keyframes dj-flash {
+  0%   { filter: brightness(1.8) drop-shadow(0 0 10px #fff176); }
+  100% { filter: brightness(1); }
+}
+
+#player.double-jump #player-sprite {
+  animation: dj-flash 0.35s ease-out forwards;
+}
+
+/* ── SHIELD INDICATOR ────────────────────────────────────────── */
+#shield-indicator {
+  position: fixed;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,201,167,0.88);
+  color: #0a1628;
+  padding: 5px 18px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  z-index: 50;
+  animation: boost-pulse 0.6s ease-in-out infinite alternate;
+}
 /* ══════════════════════════════════════════════════════════════
    NEW FEATURES: Combo HUD, Vignette, Particles, Mission Panel
    ══════════════════════════════════════════════════════════════ */
@@ -848,4 +905,212 @@ body.dark-mode #ground {
 @media (max-width: 480px) {
   #mission-panel { flex-direction: column; padding: 4px 8px; }
   .mission-item  { flex: unset; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BOSS WAVE, WEATHER, TRAILS, ACHIEVEMENTS
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── BOSS WAVE ───────────────────────────────────────────────── */
+@keyframes boss-flicker {
+  0%, 100% { border-color: rgba(255, 77, 109, 0.5); box-shadow: inset 0 0 30px rgba(255,77,109,0.15); }
+  50%       { border-color: rgba(255, 77, 109, 0.9); box-shadow: inset 0 0 60px rgba(255,77,109,0.35); }
+}
+
+#game-scene.boss-wave {
+  animation: boss-flicker 0.6s ease-in-out infinite;
+}
+
+.boss-element {
+  filter: drop-shadow(0 0 10px rgba(255, 77, 109, 0.9));
+  transform-origin: center;
+  animation: obstacle-enter 0.15s ease-out, boss-shake 0.3s ease-in-out infinite alternate !important;
+}
+
+@keyframes boss-shake {
+  from { transform: rotate(-4deg) scale(1.05); }
+  to   { transform: rotate(4deg) scale(1.1); }
+}
+
+.popup.boss {
+  color: #ff4d6d;
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-shadow: 0 0 18px rgba(255,77,109,0.9);
+  letter-spacing: 0.08em;
+}
+
+/* ── WEATHER EFFECTS ─────────────────────────────────────────── */
+
+/* Rain overlay — animated stripes */
+@keyframes rain-fall {
+  from { transform: translateY(-100%) translateX(10px); opacity: 0.7; }
+  to   { transform: translateY(110%) translateX(-10px); opacity: 0.2; }
+}
+
+.rain-drop {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 18px;
+  background: linear-gradient(180deg, transparent, rgba(160, 210, 255, 0.75));
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 18;
+  animation: rain-fall 0.6s linear infinite;
+}
+
+.storm-drop {
+  width: 3px;
+  height: 24px;
+  background: linear-gradient(180deg, transparent, rgba(200, 230, 255, 0.9));
+  filter: drop-shadow(0 0 3px rgba(150,200,255,0.5));
+}
+
+/* Fog overlay on scene */
+#game-scene.weather-fog::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(200,220,240,0.35) 0%, transparent 70%);
+  z-index: 17;
+  pointer-events: none;
+  animation: fog-drift 4s ease-in-out infinite alternate;
+}
+
+@keyframes fog-drift {
+  from { opacity: 0.4; transform: scaleX(1); }
+  to   { opacity: 0.7; transform: scaleX(1.08); }
+}
+
+/* Storm lightning flash */
+@keyframes storm-flash {
+  0%, 90%, 100% { background: transparent; }
+  92%            { background: rgba(200, 230, 255, 0.12); }
+  94%            { background: transparent; }
+  96%            { background: rgba(200, 230, 255, 0.08); }
+}
+
+#game-scene.weather-storm {
+  animation: storm-flash 3s ease-in-out infinite;
+}
+
+/* ── PLAYER TRAIL ────────────────────────────────────────────── */
+.player-trail {
+  position: absolute;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(0,201,167,0.45), transparent);
+  pointer-events: none;
+  z-index: 7;
+  animation: trail-fade 0.3s ease-out forwards;
+}
+
+@keyframes trail-fade {
+  from { opacity: 0.7; transform: scaleX(1); }
+  to   { opacity: 0;   transform: scaleX(0.6); }
+}
+
+/* ── ACHIEVEMENT BANNER (toast) ──────────────────────────────── */
+.achievement-banner {
+  position: fixed;
+  top: 80px;
+  right: -340px;
+  width: 300px;
+  background: linear-gradient(135deg, #1a2a3a 0%, #0d3b2e 100%);
+  border: 2px solid #00c9a7;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0,201,167,0.35);
+  transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.achievement-banner.ach-show {
+  right: 16px;
+}
+
+.ach-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.ach-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ach-title {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: #00c9a7;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ach-name {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #f0f4f8;
+  letter-spacing: 0.04em;
+}
+
+/* ── ACHIEVEMENT PANEL (below missions) ──────────────────────── */
+#achievement-panel {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 4px 8px 8px;
+  pointer-events: none;
+}
+
+.ach-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(10,22,40,0.5);
+  border: 1px solid rgba(0,201,167,0.15);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.62rem;
+  color: var(--col-muted);
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.ach-item.ach-done {
+  border-color: rgba(0,201,167,0.45);
+  color: #00c9a7;
+}
+
+.ach-item-icon {
+  font-size: 0.9rem;
+}
+
+.ach-item-name {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* ── RUN STATS (game-over screen) ────────────────────────────── */
+.run-stats {
+  display: flex;
+  gap: 18px;
+  font-size: 0.78rem;
+  color: #546e7a;
+  letter-spacing: 0.05em;
+  padding: 8px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.run-stats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }

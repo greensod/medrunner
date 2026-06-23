@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Med Student Runner 🩺</title>
+  <title>JiniRun🩺</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -24,7 +24,7 @@
   ======================================================== -->
   <div id="start-screen" class="overlay-screen hidden">
     <div class="overlay-content">
-      <h1 class="game-title">🩺 Med Runner</h1>
+      <h1 class="game-title">🩺 JiniRun</h1>
       <p class="subtitle">Survive exams. Collect bones. Graduate.</p>
       <div class="controls-hint">
         <span>⬆ / Space = Jump</span>
@@ -40,7 +40,7 @@
   <div id="gameover-screen" class="overlay-screen hidden">
     <div class="overlay-content">
       <h2 class="gameover-title">💀 GAME OVER</h2>
-      <p class="gameover-subtitle">The professor wins this round.</p>
+      <p class="gameover-subtitle">Better luck next time</p>
       <div class="score-display">
         <div class="score-row">
           <span class="score-label">SCORE</span>
@@ -121,15 +121,37 @@
   <script>
     // ── BIRTHDAY INTRO: typing animation + cute floating background ──
     (function () {
-      const MESSAGE = 'Happy Birthday to my personal Genie 🎂';
+      const MESSAGE = 'Happy Birthday Genie 🎂';
       const $typed   = document.getElementById('birthday-typed');
       const $screen  = document.getElementById('birthday-screen');
       const $startScreen = document.getElementById('start-screen');
       const $continueBtn = document.getElementById('birthday-continue-btn');
       const $bg = document.getElementById('birthday-bg');
 
+      // Birthday sound — plays while the intro screen is up, stops on Continue
+      const birthdaySound = new Audio('assets/birthday.wav');
+      birthdaySound.volume = 0.7;
+      birthdaySound.onerror = () => {}; // fail silently if the file isn't there yet
+
+      let dismissed = false; // becomes true the instant Continue is pressed
+
+      function tryPlayBirthdaySound() {
+        if (dismissed) return;
+        const p = birthdaySound.play();
+        if (p) p.catch(() => {
+          // Autoplay blocked by the browser — retry on the first tap/click,
+          // but ONLY on the birthday screen itself, and only if still showing.
+          const resume = () => {
+            if (!dismissed) birthdaySound.play().catch(() => {});
+          };
+          $screen.addEventListener('touchstart', resume, { once: true });
+          $screen.addEventListener('click', resume, { once: true });
+        });
+      }
+      tryPlayBirthdaySound();
+
       // Cute floating background: balloons, hearts, sparkles drifting up
-      const FLOATERS = ['🎈', '✨', '💖', '🎉', '🌟', '🎈', '💫', '🎂'];
+      const FLOATERS = ['🎈', '✨', '🎉', '🌟', '🎈', '💫', '🎂'];
       const floaterCount = 22;
       for (let i = 0; i < floaterCount; i++) {
         const el = document.createElement('span');
@@ -161,6 +183,9 @@
       setTimeout(typeNext, 400);
 
       function goToStartScreen() {
+        dismissed = true;
+        birthdaySound.pause();
+        birthdaySound.currentTime = 0;
         $screen.classList.add('hidden');
         $startScreen.classList.remove('hidden');
       }
