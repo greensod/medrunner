@@ -40,7 +40,7 @@
   <div id="gameover-screen" class="overlay-screen hidden">
     <div class="overlay-content">
       <h2 class="gameover-title">💀 GAME OVER</h2>
-      <p class="gameover-subtitle">Better luck next time</p>
+      <p class="gameover-subtitle">The professor wins this round.</p>
       <div class="score-display">
         <div class="score-row">
           <span class="score-label">SCORE</span>
@@ -107,12 +107,6 @@
 
     </div><!-- end #game-scene -->
 
-    <!-- MOBILE CONTROLS -->
-    <div id="mobile-controls">
-      <button id="btn-jump" class="mobile-btn">▲ JUMP</button>
-      <button id="btn-duck" class="mobile-btn">▼ DUCK</button>
-    </div>
-
   </div><!-- end #game-wrapper -->
 
   <!-- Speed boost indicator -->
@@ -151,7 +145,7 @@
       tryPlayBirthdaySound();
 
       // Cute floating background: balloons, hearts, sparkles drifting up
-      const FLOATERS = ['🎈', '✨', '🎉', '🌟', '🎈', '💫', '🎂'];
+      const FLOATERS = ['🎈', '✨', '💖', '🎉', '🌟', '🎈', '💫', '🎂'];
       const floaterCount = 22;
       for (let i = 0; i < floaterCount; i++) {
         const el = document.createElement('span');

@@ -621,41 +621,6 @@ body.dark-mode #ground {
 .popup.negative { color: var(--col-danger); text-shadow: 0 0 8px rgba(255,77,109,0.8); }
 .popup.boost    { color: var(--col-accent); font-size: 0.85rem; }
 
-/* ── MOBILE CONTROLS ────────────────────────────────────────── */
-#mobile-controls {
-  display: none;
-  gap: 16px;
-  width: 100%;
-  max-width: 700px;
-}
-
-@media (max-width: 600px), (pointer: coarse) {
-  #mobile-controls {
-    display: flex;
-  }
-}
-
-.mobile-btn {
-  flex: 1;
-  padding: 14px 10px;
-  background: rgba(0,201,167,0.12);
-  border: 2px solid rgba(0,201,167,0.4);
-  border-radius: 12px;
-  color: var(--col-accent);
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.mobile-btn:active {
-  background: rgba(0,201,167,0.25);
-  transform: scale(0.97);
-}
-
 /* ── BOOST INDICATOR ────────────────────────────────────────── */
 #boost-indicator {
   position: fixed;

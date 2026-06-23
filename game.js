@@ -214,8 +214,6 @@ const $livesDisplay     = document.getElementById('lives-display');
 const $finalScore       = document.getElementById('final-score');
 const $finalHighscore   = document.getElementById('final-highscore');
 const $boostIndicator   = document.getElementById('boost-indicator');
-const $btnJump          = document.getElementById('btn-jump');
-const $btnDuck          = document.getElementById('btn-duck');
 
 // ── AUDIO ──────────────────────────────────────────────────────
 // start.wav = looping MENU MUSIC: begins on the first user interaction
@@ -421,14 +419,6 @@ document.addEventListener('keyup', (e) => {
   delete keysDown[e.code];
 });
 
-// ── MOBILE BUTTONS ────────────────────────────────────────────
-$btnJump.addEventListener('touchstart', (e) => { e.preventDefault(); doJump(); });
-$btnJump.addEventListener('mousedown',  () => doJump());
-$btnDuck.addEventListener('touchstart', (e) => { e.preventDefault(); startDuck(); });
-$btnDuck.addEventListener('touchend',   (e) => { e.preventDefault(); stopDuck(); });
-$btnDuck.addEventListener('mousedown',  () => startDuck());
-$btnDuck.addEventListener('mouseup',    () => stopDuck());
-
 // ── FULL-SCREEN TOUCH GESTURES (tap = jump, swipe down = duck) ──
 // Tap anywhere on the scene → jump (tap again mid-air → double jump,
 // handled automatically inside doJump()). A downward swipe → duck for
@@ -443,8 +433,6 @@ $btnDuck.addEventListener('mouseup',    () => stopDuck());
 
   $scene.addEventListener('touchstart', (e) => {
     if (!state.running) return;
-    // Ignore touches that started on the mobile buttons (they handle themselves)
-    if (e.target.closest('#mobile-controls')) return;
 
     const t = e.changedTouches[0];
     touchStartX = t.clientX;
