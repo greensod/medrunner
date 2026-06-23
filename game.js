@@ -216,9 +216,8 @@ const $finalHighscore   = document.getElementById('final-highscore');
 const $boostIndicator   = document.getElementById('boost-indicator');
 
 // ── AUDIO ──────────────────────────────────────────────────────
-// start.wav = looping MENU MUSIC: begins on the first user interaction
-// while the start screen is open, stops the moment the game starts.
-// All other sounds are one-shot SFX fired via playSound().
+// start.wav = one-shot SFX, played the moment the START GAME button
+// is pressed. All other sounds are one-shot SFX fired via playSound().
 
 function loadAudio(src) {
   const a = new Audio(src);
@@ -227,6 +226,7 @@ function loadAudio(src) {
 }
 
 const SFX = {
+  start:    loadAudio('assets/start.wav'),
   catch:    loadAudio('assets/catch.wav'),
   hit:      loadAudio('assets/hit.wav'),
   gameover: loadAudio('assets/gameover.wav'),
@@ -234,27 +234,7 @@ const SFX = {
   mission:  loadAudio('assets/mission.wav'),
 };
 
-// Menu music plays once on the start screen, stops when game begins
-const menuMusic = loadAudio('assets/start.wav');
-menuMusic.volume = 0.55;
-let _menuMusicStarted = false;
-
-function startMenuMusic() {
-  if (_menuMusicStarted) return;
-  _menuMusicStarted = true;
-  menuMusic.currentTime = 0;
-  menuMusic.play().catch(() => {});
-}
-
-function stopMenuMusic() {
-  menuMusic.pause();
-  menuMusic.currentTime = 0;
-  _menuMusicStarted = false;
-}
-
-// First user interaction → start menu music + warm up all SFX
-function _onFirstInteraction() {
-  startMenuMusic();
+function _warmUpSFX() {
   Object.values(SFX).forEach(a => {
     if (!a) return;
     const p = a.play();
@@ -263,7 +243,7 @@ function _onFirstInteraction() {
 }
 
 ['click', 'touchstart', 'keydown'].forEach(evt =>
-  document.addEventListener(evt, _onFirstInteraction, { once: true, passive: true })
+  document.addEventListener(evt, _warmUpSFX, { once: true, passive: true })
 );
 
 function playSound(name) {
@@ -1199,12 +1179,11 @@ function startGame() {
   applyPlayerPosition();
   renderMissionPanel();
 
-  stopMenuMusic(); // stop menu music when game begins
   state.rafId = requestAnimationFrame(gameLoop);
 }
 
 // ── BUTTON LISTENERS ──────────────────────────────────────────
-$startBtn.addEventListener('click',   startGame);
+$startBtn.addEventListener('click',   () => { playSound('start'); startGame(); });
 $restartBtn.addEventListener('click', startGame);
 
 document.addEventListener('keydown', (e) => {
